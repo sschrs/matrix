@@ -168,10 +168,10 @@ func (matrix Matrix) Mean() float64 {
 	return matrix.Sum() / float64((matrix.Shape()["cols"] * matrix.Shape()["rows"]))
 }
 
-// JoinRow adds new rows to the matrix and returns the result matrix
+// JoinRows adds new rows to the matrix and returns the result matrix
 // The 'rows' parameter is an array of rows to be added.
 // The 'index' parameter specifies from which index new rows will be inserted.
-func (matrix Matrix) JoinRow(rows []Row, index int) Matrix {
+func (matrix Matrix) JoinRows(rows []Row, index int) Matrix {
 	var mx Matrix = rows
 
 	if len(matrix) == 0 {
@@ -222,7 +222,7 @@ func (matrix Matrix) RemoveRow(index int) Matrix {
 		return matrix[:index]
 	}
 
-	return matrix[:index].JoinRow(matrix[index+1:], -1)
+	return matrix[:index].JoinRows(matrix[index+1:], -1)
 }
 
 // MultiplyRow multiplies the row of the matrix at the given index by the value given as a parameter and returns the result matrix
@@ -283,6 +283,34 @@ func (matrix Matrix) GetColumn(colIndex int) []Col {
 		col = append(col, matrix[i][colIndex])
 	}
 	return col
+}
+
+func (matrix Matrix) JoinColumn(newCol []Col, index int) Matrix {
+	if matrix.Shape()["rows"] != len(newCol) {
+		panic("the length of the column to be inserted must be the same as the number of rows of the matrix")
+	}
+	if index > matrix.Shape()["cols"] {
+		panic("index out of range")
+	}
+
+	if index == -1 {
+		index = matrix.Shape()["cols"]
+	}
+
+	newMatrix := Zeros(matrix.Shape()["rows"], matrix.Shape()["cols"]+1)
+
+	for row := range newMatrix {
+		for i := 0; i < index; i++ {
+			newMatrix[row][i] = matrix[row][i]
+		}
+
+		newMatrix[row][index] = Col(newCol[row])
+
+		for j := index + 1; j < newMatrix.Shape()["cols"]; j++ {
+			newMatrix[row][j] = matrix[row][j-1]
+		}
+	}
+	return newMatrix
 }
 
 // UpperTriangle creates the upper triangle matrix and returns the result matrix

@@ -56,3 +56,21 @@ func AsMatrix(arr [][]float64) Matrix {
 	}
 	return matrix
 }
+
+// GenerateRow creates a row with all values of the given value and returns it as a Row type
+func GenerateRow(row_size int, value float64) Row {
+	row := make(Row, row_size)
+	for i := range row {
+		row[i] = Col(value)
+	}
+	return row
+}
+
+// GenerateColumn creates a column with all values of the given value as a []Col type
+func GenerateColumn(col_size int, value float64) []Col {
+	col := make([]Col, col_size)
+	for i := range col {
+		col[i] = Col(value)
+	}
+	return col
+}
