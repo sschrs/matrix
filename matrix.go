@@ -1,6 +1,10 @@
 package matrix
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+	"sort"
+)
 
 type Col float64
 type Row []Col
@@ -24,6 +28,18 @@ func (matrix Matrix) Copy() Matrix {
 	}
 	var newMatrix Matrix = rows
 	return newMatrix
+}
+
+// ToArray converts the matrix to an array in the form [][]float64 and returns it
+func (matrix Matrix) ToArray() [][]float64 {
+	arr := make([][]float64, matrix.Shape()["rows"])
+	for i := range matrix {
+		arr[i] = make([]float64, matrix.Shape()["cols"])
+		for j := range matrix[i] {
+			arr[i][j] = float64(matrix[i][j])
+		}
+	}
+	return arr
 }
 
 // Shape gives the shape of a matrix in a map includes 'cols' and 'rows' index
@@ -166,6 +182,47 @@ func (matrix Matrix) Sum() float64 {
 // Mean returns the mean of the values in the matrix
 func (matrix Matrix) Mean() float64 {
 	return matrix.Sum() / float64((matrix.Shape()["cols"] * matrix.Shape()["rows"]))
+}
+
+// Variance returns the variance of the values in the matrix
+func (matrix Matrix) Variance() float64 {
+	var sum float64 = 0
+	mean := matrix.Mean()
+	for row := range matrix {
+		for col := range matrix[row] {
+			sum += math.Pow((float64(matrix[row][col]) - mean), 2)
+		}
+	}
+	return sum / float64(matrix.Shape()["cols"]*matrix.Shape()["rows"])
+}
+
+// Std returns the standard deviation of the values in the matrix
+func (matrix Matrix) Std() float64 {
+	return math.Sqrt(matrix.Variance())
+}
+
+// Max returns the max value of matrix
+func (matrix Matrix) Max() float64 {
+	var values []float64
+	for r := range matrix {
+		for c := range matrix[r] {
+			values = append(values, float64(matrix[r][c]))
+		}
+	}
+	sort.Float64s(values)
+	return values[len(values)-1]
+}
+
+// Min returns the min value of matrix
+func (matrix Matrix) Min() float64 {
+	var values []float64
+	for r := range matrix {
+		for c := range matrix[r] {
+			values = append(values, float64(matrix[r][c]))
+		}
+	}
+	sort.Float64s(values)
+	return values[0]
 }
 
 // JoinRows adds new rows to the matrix and returns the result matrix
@@ -333,16 +390,4 @@ func (matrix Matrix) UpperTriangle() Matrix {
 		}
 	}
 	return newMatrix
-}
-
-// ToArray converts the matrix to an array in the form [][]float64 and returns it
-func (matrix Matrix) ToArray() [][]float64 {
-	arr := make([][]float64, matrix.Shape()["rows"])
-	for i := range matrix {
-		arr[i] = make([]float64, matrix.Shape()["cols"])
-		for j := range matrix[i] {
-			arr[i][j] = float64(matrix[i][j])
-		}
-	}
-	return arr
 }
