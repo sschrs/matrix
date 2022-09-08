@@ -173,6 +173,12 @@ func (matrix Matrix) Mean() float64 {
 // The 'index' parameter specifies from which index new rows will be inserted.
 func (matrix Matrix) JoinRow(rows []Row, index int) Matrix {
 	var mx Matrix = rows
+
+	if len(matrix) == 0 {
+		var newMatrix Matrix = rows
+		return newMatrix
+	}
+
 	if mx.Shape()["cols"] != matrix.Shape()["cols"] {
 		panic("the matrices must have same column size.")
 	}
@@ -204,6 +210,19 @@ func (matrix Matrix) JoinRow(rows []Row, index int) Matrix {
 	}
 
 	return newMatrix
+}
+
+// RemoveRow removes the row at given index
+func (matrix Matrix) RemoveRow(index int) Matrix {
+	if index >= matrix.Shape()["rows"] {
+		panic("index out of range")
+	}
+
+	if index == len(matrix)-1 {
+		return matrix[:index]
+	}
+
+	return matrix[:index].JoinRow(matrix[index+1:], -1)
 }
 
 // MultiplyRow multiplies the row of the matrix at the given index by the value given as a parameter and returns the result matrix
