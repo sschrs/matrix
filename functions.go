@@ -1,5 +1,11 @@
 package matrix
 
+import (
+	"math"
+	"math/rand"
+)
+
+// Zeros creates a matrix of 0s of the given size
 func Zeros(row_count, col_count int) Matrix {
 	rows := make([]Row, row_count)
 	for i, _ := range rows {
@@ -9,6 +15,7 @@ func Zeros(row_count, col_count int) Matrix {
 	return mx
 }
 
+// Generate creates a matrix with all values of the given value.
 func Generate(row_count, col_count int, value Col) Matrix {
 	rows := make([]Row, row_count)
 	for i, _ := range rows {
@@ -21,6 +28,20 @@ func Generate(row_count, col_count int, value Col) Matrix {
 	return mx
 }
 
+func GenerateRand(row_count, col_count int) Matrix {
+	rows := make([]Row, row_count)
+	for i, _ := range rows {
+		rows[i] = make(Row, col_count)
+		for j := range rows[i] {
+			value := math.Floor(rand.Float64()*10000) / 100
+			rows[i][j] = Col(value)
+		}
+	}
+	var mx Matrix = rows
+	return mx
+}
+
+// AsMatrix converts an array in the form of [][]float64 to a matrix
 func AsMatrix(arr [][]float64) Matrix {
 	row_count := len(arr)
 	if row_count <= 0 {
