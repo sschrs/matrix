@@ -391,3 +391,25 @@ func (matrix Matrix) UpperTriangle() Matrix {
 	}
 	return newMatrix
 }
+
+// LowerTriangle creates the lower triangle matrix and returns the result matrix
+func (matrix Matrix) LowerTriangle() Matrix {
+	newMatrix := matrix.Copy()
+
+	row_index := 0
+	for newMatrix[len(matrix)-1][len(matrix)-1] == 0 {
+		newMatrix = newMatrix.SwapRows(0, row_index)
+		row_index++
+		if row_index > len(matrix) {
+			panic("all columns is 0 in 0th index")
+		}
+	}
+
+	for i := len(newMatrix) - 1; i >= 0; i-- {
+		multiplication_value := newMatrix[i][i]
+		for j := i - 1; j >= 0; j-- {
+			newMatrix = newMatrix.PlusRow(j, newMatrix.MultiplyRow(i, -(newMatrix[j][i] / multiplication_value))[i])
+		}
+	}
+	return newMatrix
+}
