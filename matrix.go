@@ -106,12 +106,14 @@ func (matrix Matrix) Subtract(mx Matrix) Matrix {
 		panic("the matrices must be in the same size.")
 	}
 
-	for i := 0; i < len(matrix); i++ {
-		for j := 0; j < len(matrix[0]); j++ {
-			mx[i][j] = matrix[i][j] - mx[i][j]
+	newMatrix := matrix.Copy()
+
+	for i := range newMatrix {
+		for j := range newMatrix[i] {
+			newMatrix[i][j] -= mx[i][j]
 		}
 	}
-	return mx
+	return newMatrix
 }
 
 // Plus
@@ -135,21 +137,20 @@ func (matrix Matrix) Minus(value Col) Matrix {
 }
 
 // Multiply multiplies all values in the matrix with the value given as a parameter and returns the result matrix
-func (matrix Matrix) Multiply(value Col) Matrix {
-	rows := make([]Row, matrix.Shape()["rows"])
-	for i := range rows {
-		rows[i] = make(Row, matrix.Shape()["cols"])
-		for j := range matrix[i] {
-			rows[i][j] = matrix[i][j] * value
-		}
+func (matrix Matrix) Multiply(value float64) Matrix {
+	newMatrix := matrix.Copy()
 
+	for i := range newMatrix {
+		for j := range newMatrix[i] {
+			newMatrix[i][j] = newMatrix[i][j] * Col(value)
+		}
 	}
-	var newMatrix Matrix = rows
+
 	return newMatrix
 }
 
 // Divide divides all values in the matrix and the value given as a parameter and returns the result matrix
-func (matrix Matrix) Divide(value Col) Matrix {
+func (matrix Matrix) Divide(value float64) Matrix {
 	return matrix.Multiply(1 / value)
 }
 
@@ -409,6 +410,65 @@ func (matrix Matrix) LowerTriangle() Matrix {
 		multiplication_value := newMatrix[i][i]
 		for j := i - 1; j >= 0; j-- {
 			newMatrix = newMatrix.PlusRow(j, newMatrix.MultiplyRow(i, -(newMatrix[j][i] / multiplication_value))[i])
+		}
+	}
+	return newMatrix
+}
+
+func (matrix Matrix) Inv() Matrix {
+	newMatrix := matrix.Copy()
+	unitMatrix := UnitMatrix(matrix.Shape()["rows"], matrix.Shape()["cols"])
+
+	row_index := len(matrix) - 1
+	for newMatrix[0][0] == 0 {
+		newMatrix = newMatrix.SwapRows(0, row_index)
+		row_index--
+		if row_index < 0 {
+			panic("all columns is 0 in 0th index")
+		}
+	}
+
+	for i := range newMatrix {
+		multiplication_value := newMatrix[i][i]
+		for j := i + 1; j < len(newMatrix); j++ {
+			v := -(newMatrix[j][i] / multiplication_value)
+			newMatrix = newMatrix.PlusRow(j, newMatrix.MultiplyRow(i, v)[i])
+			unitMatrix = unitMatrix.PlusRow(j, unitMatrix.MultiplyRow(i, v)[i])
+		}
+	}
+
+	row_index = 0
+	for newMatrix[len(matrix)-1][len(matrix)-1] == 0 {
+		newMatrix = newMatrix.SwapRows(0, row_index)
+		row_index++
+		if row_index > len(matrix) {
+			panic("all columns is 0 in 0th index")
+		}
+	}
+
+	for i := len(newMatrix) - 1; i >= 0; i-- {
+		multiplication_value := newMatrix[i][i]
+		for j := i - 1; j >= 0; j-- {
+			v := -(newMatrix[j][i] / multiplication_value)
+			newMatrix = newMatrix.PlusRow(j, newMatrix.MultiplyRow(i, v)[i])
+			unitMatrix = unitMatrix.PlusRow(j, unitMatrix.MultiplyRow(i, v)[i])
+		}
+	}
+
+	for i := range newMatrix {
+		multiplication_value := 1 / newMatrix[i][i]
+		newMatrix = newMatrix.MultiplyRow(i, multiplication_value)
+		unitMatrix = unitMatrix.MultiplyRow(i, multiplication_value)
+	}
+
+	return unitMatrix
+}
+
+func (matrix Matrix) RoundValues() Matrix {
+	newMatrix := matrix.Copy()
+	for i := range newMatrix {
+		for j := range newMatrix[i] {
+			newMatrix[i][j] = Col(math.Round(float64(newMatrix[i][j])*10000) / 10000)
 		}
 	}
 	return newMatrix

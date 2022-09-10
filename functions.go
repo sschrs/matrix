@@ -74,3 +74,20 @@ func GenerateColumn(col_size int, value float64) []Col {
 	}
 	return col
 }
+
+// UnitMatrix creates a unit matrix and returns it
+func UnitMatrix(row_count, col_count int) Matrix {
+	rows := make([]Row, row_count)
+	for i, _ := range rows {
+		rows[i] = make(Row, col_count)
+		for j := range rows[i] {
+			if i == j {
+				rows[i][j] = 1
+			} else {
+				rows[i][j] = 0
+			}
+		}
+	}
+	var mx Matrix = rows
+	return mx
+}
