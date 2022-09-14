@@ -415,6 +415,7 @@ func (matrix Matrix) LowerTriangle() Matrix {
 	return newMatrix
 }
 
+// Inv returns the inverse of a matrix
 func (matrix Matrix) Inv() Matrix {
 	newMatrix := matrix.Copy()
 	unitMatrix := UnitMatrix(matrix.Shape()["rows"], matrix.Shape()["cols"])
@@ -464,6 +465,7 @@ func (matrix Matrix) Inv() Matrix {
 	return unitMatrix
 }
 
+// RoundValues rounds the values in the matrix
 func (matrix Matrix) RoundValues() Matrix {
 	newMatrix := matrix.Copy()
 	for i := range newMatrix {
