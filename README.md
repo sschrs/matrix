@@ -45,3 +45,5 @@ applied_matrix := custom_matrix.Apply(func(x matrix.Col) matrix.Col {
     return 3*x + 10
 })
 ```
+
+For more information see the docs: https://github.com/sschrs/matrix/wiki
