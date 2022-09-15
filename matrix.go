@@ -343,6 +343,8 @@ func (matrix Matrix) GetColumn(colIndex int) []Col {
 	return col
 }
 
+// JoinColumn adds new rows to the matrix and returns the result matrix
+// The index parameter specifies which index the column will be added to.
 func (matrix Matrix) JoinColumn(newCol []Col, index int) Matrix {
 	if matrix.Shape()["rows"] != len(newCol) {
 		panic("the length of the column to be inserted must be the same as the number of rows of the matrix")
@@ -367,6 +369,26 @@ func (matrix Matrix) JoinColumn(newCol []Col, index int) Matrix {
 		for j := index + 1; j < newMatrix.Shape()["cols"]; j++ {
 			newMatrix[row][j] = matrix[row][j-1]
 		}
+	}
+	return newMatrix
+}
+
+// RemoveColumn deletes column at given index and returns the result matrix
+func (matrix Matrix) RemoveColumn(index int) Matrix {
+	if index >= matrix.Shape()["cols"] {
+		panic("index out of range")
+	}
+
+	if index == -1 {
+		index = len(matrix) - 1
+	}
+
+	newMatrix := make(Matrix, len(matrix))
+	for i := 0; i < matrix.Shape()["cols"]; i++ {
+		if i == index {
+			continue
+		}
+		newMatrix = newMatrix.JoinColumn(matrix.GetColumn(i), -1)
 	}
 	return newMatrix
 }
@@ -474,4 +496,30 @@ func (matrix Matrix) RoundValues() Matrix {
 		}
 	}
 	return newMatrix
+}
+
+// Det returns determinant of the matrix
+func (matrix Matrix) Det() float64 {
+	if matrix.Shape()["rows"] != matrix.Shape()["cols"] {
+		panic("the size of rows and cols must be same")
+	}
+
+	if matrix.Shape()["rows"] <= 0 || matrix.Shape()["cols"] <= 0 {
+		panic("empty matrix")
+	}
+
+	if matrix.Shape()["rows"] == 1 && matrix.Shape()["cols"] == 1 {
+		return float64(matrix[0][0])
+	}
+
+	row := matrix[0]
+
+	det := 0.0
+
+	for i := range row {
+		a := float64(matrix[0][i])
+		cofactor := math.Pow(-1, float64(i)) * matrix.RemoveRow(0).RemoveColumn(i).Det()
+		det += (a * cofactor)
+	}
+	return det
 }
